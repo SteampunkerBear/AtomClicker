@@ -1,3 +1,2 @@
 Django>=4.2,<5.0
-gunicorn>=21.2.0     # for production server (optional)
 whitenoise>=6.7.0
