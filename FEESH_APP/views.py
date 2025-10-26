@@ -92,7 +92,7 @@ def apply_model_prestige(request, model_name, cost, flag_name):
         request.user.point = 0
 
         # Apply multiplier
-        request.session["model_multiplier"] = request.session.get("model_multiplier", 1) * 4
+        request.session["model_multiplier"] = request.session.get("model_multiplier", 1) * 2
 
         # Update model state
         request.session["model_right_now"] = model_name
