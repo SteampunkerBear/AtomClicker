@@ -36,7 +36,7 @@ ALLOWED_HOSTS = ["atomclicker-production.up.railway.app"]
 # Application definition
 
 CSRF_TRUSTED_ORIGINS = [
-    'atomclicker-production.up.railway.app',
+    'https://atomclicker-production.up.railway.app',
 ]
 
 INSTALLED_APPS = [
