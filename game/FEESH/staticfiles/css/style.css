@@ -1,0 +1,256 @@
+body {
+    background-color: black;
+    color: white;
+    margin: 0;
+    overflow-x: hidden;
+}
+
+img {
+    border: 2px solid white;
+    box-shadow: 0 0 10px white;
+}
+
+#button-container {
+    position: relative;
+    width: 95%;              /* Full screen width */
+    height: 90%;      /* Full screen height */
+    margin: 0 auto;        
+    border: 2px solid white;   /* Full border */
+    box-sizing: border-box;
+    padding-left: 5vw;         /* Adds space inside the border */
+    padding-right: 5vw;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+#move-button {
+    position: relative;
+}
+
+#restart-button {
+    position: absolute;
+    top: 3%;
+    right: 5%;
+    background-color: red;
+    color: white;
+    padding: 10px;
+    border-radius: 5px;
+    font-weight: bold;
+    transform: translate(-50%, -50%);
+}
+
+#move-text {
+  text-align: center;
+  margin-top: 16px;
+  font-size: 20px;
+  color: #ffffff;
+}
+
+.button-stack {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px; /* controls spacing between elements */
+}
+
+.gain-display {
+  position: relative;
+  top: -20px; /* raises it above the atom */
+  font-size: 18px;
+  color: white;
+  text-align: center;
+  margin-bottom: 0;
+}
+
+/* Shared styles for both corners */
+.corner-text {
+  position: absolute;
+  top: 75%;   
+  max-width: 40%;
+  font-size: 16px;
+  color: white;
+  line-height: 1.4;
+  word-wrap: break-word;
+}
+
+/* Specific positions */
+#bottom-left-text {
+  left: 5%;
+  text-align: left;
+}
+
+#bottom-right-text {
+  right: 5%;
+  text-align: right;
+}
+
+/* THIS IS FOR POINTS COUNTER */
+#points-counter {
+  position: absolute;
+  top: 5%; /* adjust to match atom's vertical level */
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 32px;
+  font-weight: bold;
+  color: white;
+  z-index: 10;
+}
+
+/* THIS IS FOR TITLE */
+#page-title {
+  text-align: center;
+  font-size: 32px;
+  color: white;
+  margin-top: 20px;
+  margin-bottom: 10px;
+  font-weight: bold;
+}
+
+/* THIS IS FOR THE UPGRADES PART OF THE GAME */
+#model-upgrades {
+  position: absolute;
+  top: 12%;
+  left: 10%;
+  width: 20%;
+  color: white;
+  font-size: 16px;
+  text-align: center;
+}
+
+#gain-upgrades {
+  position: absolute;
+  top: 15%;
+  right: 10%;
+  width: 20%;
+  color: white;
+  font-size: 16px;
+  text-align: center;
+}
+
+#model-upgrades h2,
+#gain-upgrades h2 {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+#model-upgrades button,
+#gain-upgrades button {
+  background-color: #222;
+  color: white;
+  border: 1px solid white;
+  padding: 10px;
+  border-radius: 5px;
+  margin-bottom: 7%;
+  width: 100%;
+  cursor: pointer;
+}
+
+.upgrade-block {
+  margin-bottom: 20px;
+  text-align: center;
+  color: white;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.08); }
+  100% { transform: scale(1); }
+}
+
+.pulsing {
+  animation: pulse 0.4s ease-in-out;
+}
+
+/* Upgrade button base */
+.upgrade-button {
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+}
+
+/* Ripple effect span */
+.ripple {
+  position: absolute;
+  width: 150px; /* bigger ripple */
+  height: 150px;
+  background: rgba(0, 255, 0, 0.3); /* soft green */
+  border-radius: 50%;
+  transform: scale(0);
+  animation: ripple 1s ease-out; /* slower and smoother */
+  pointer-events: none;
+  z-index: 0;
+}
+
+@keyframes ripple {
+  to {
+    transform: scale(5);
+    opacity: 0;
+  }
+}
+
+/* Glow flash effect */
+.glow-flash {
+  animation: glowFlash 0.5s ease-in-out;
+}
+
+@keyframes glowFlash {
+  0% { box-shadow: 0 0 0px #0f0; }
+  50% { box-shadow: 0 0 12px #0f0; }
+  100% { box-shadow: 0 0 0px #0f0; }
+}
+
+.upgrade-badge {
+  display: inline-block;
+  width: 90%;
+  margin-bottom: 12%;
+  padding: 8px 16px;
+  background-color: limegreen;
+  color: white;
+  font-weight: bold;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+  animation: badgeFloat 1s ease-out;
+}
+
+@keyframes badgeFloat {
+  0% { opacity: 0; transform: translateY(10px) scale(0.8); }
+  50% { opacity: 1; transform: translateY(-5px) scale(1.05); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.glow-fail {
+  animation: glowFail 0.5s ease-in-out;
+}
+
+@keyframes glowFail {
+  0% { box-shadow: 0 0 0px red; }
+  50% { box-shadow: 0 0 12px red; }
+  100% { box-shadow: 0 0 0px red; }
+}
+
+@keyframes atomGlow {
+  0%   { color: white; text-shadow: none; }
+  50%  { color: limegreen; text-shadow: 0 0 10px limegreen; }
+  100% { color: white; text-shadow: none; }
+}
+
+#points-counter.glow {
+  animation: atomGlow 0.6s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.fade-in {
+  animation: fadeIn 0.6s ease-out;
+}
+
+.model-multiplier {
+  animation: fadeIn 0.6s ease-out;
+}
