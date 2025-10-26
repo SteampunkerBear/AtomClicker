@@ -1,0 +1,249 @@
+{% extends "layout.html" %}
+{% load static %}
+{% block body %}
+
+<link rel="stylesheet" href="{% static 'css/style.css' %}">
+<h1 id="page-title"> ATOM CLICKER </h1>
+
+<div id="button-container">
+
+  <div id="bottom-left-text" class="corner-text"> {{ info_on_model }}</div>
+  <div id="bottom-right-text" class="corner-text"> {{ fun_fact }}</div>
+
+  <div id="points-counter"> {{point}}  Atoms</div>
+
+  <!---- UPGRADE PART --> 
+  <div id="upgrade-layout">
+    <div id="model-upgrades">
+      <!-- Atom model evolution buttons -->
+      <h2>Model Upgrades</h2>
+      {% if model_right_now != "dalton" %}
+        <p class="model-multiplier">Model Multiplier: {{ model_multiplier }}x</p>
+      {% endif %}
+              <!-- Upgrade to Thomson Model -->
+      {% if model_thomson_purchased %}
+        <div class="upgrade-badge">Upgraded!</div>
+      {% else %}
+        <form method="POST" action="{% url 'index' %}">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="upgrade_model">
+          <input type="hidden" name="upgrade_name" value="thomson">
+          <button
+            type="button"
+            class="upgrade-button"
+            onclick="handleUpgrade(event, this)"
+            data-cost="5000"
+            data-user-points="{{ user.point }}"
+          >
+            Upgrade to Thomson -- 5K ATOMS
+          </button>
+        </form>
+      {% endif %}
+
+      <!-- Upgrade to Rutherford Model -->
+      {% if model_rutherford_purchased %}
+        <div class="upgrade-badge">Upgraded!</div>
+      {% else %}
+        <form method="POST" action="{% url 'index' %}">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="upgrade_model">
+          <input type="hidden" name="upgrade_name" value="rutherford">
+          <button
+            type="button"
+            class="upgrade-button"
+            onclick="handleUpgrade(event, this)"
+            data-cost="50000"
+            data-user-points="{{ user.point }}"
+          >
+            Upgrade to Rutherford -- 50K ATOMS
+          </button>
+        </form>
+      {% endif %}
+
+      <!-- Upgrade to Bohr Model -->
+      {% if model_bohr_purchased %}
+        <div class="upgrade-badge">Upgraded!</div>
+      {% else %}
+        <form method="POST" action="{% url 'index' %}">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="upgrade_model">
+          <input type="hidden" name="upgrade_name" value="bohr">
+          <button
+            type="button"
+            class="upgrade-button"
+            onclick="handleUpgrade(event, this)"
+            data-cost="500000"
+            data-user-points="{{ user.point }}"
+          >
+            Upgrade to Bohr -- 500K ATOMS
+          </button>
+        </form>
+      {% endif %}
+
+      <!-- Upgrade to Current Model -->
+      {% if model_current_purchased %}
+      <div class="upgrade-badge">Upgraded!</div>
+    {% else %}
+      <form method="POST" action="{% url 'index' %}">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="upgrade_model">
+        <input type="hidden" name="upgrade_name" value="current">
+        <button
+          type="button"
+          class="upgrade-button"
+          onclick="handleUpgrade(event, this)"
+          data-cost="50000"
+          data-user-points="{{ user.point }}"
+        >
+          Upgrade to Current -- 10M ATOMS
+        </button>
+      </form>
+    {% endif %}
+    </div>
+
+    <form method="POST" action="{% url 'index' %}">
+
+      {% csrf_token %}
+      <!-- WHERE THE ATOM IS -->
+      <div class = "button-stack">
+        <p id ="move-text">Click the atom! </p>
+        <div class="gain-display">
+          <strong>You Gain:</strong> {{ atom_gain }} per click!
+        </div>
+        <input type="hidden" name="action" value="click">
+        <button type="submit" id="move-button" style="border:none; background:none;">
+          <img id="atom" src="{% static image_path %}" alt="Click Me" onclick="pulse()" width="200"/>
+          
+        </button>
+        <p id ="move-text"> {{ button_text }} </p>
+      </div>
+    </form>
+    <!-- ALL THE UPGRADES ARE HERE-->
+    <div id="gain-upgrades">
+
+      <!-- Atom gain upgrade buttons -->
+      <h2>Atom Gain Upgrades</h2>
+
+      <!-- +1 Atom per Click -->
+      <div class="upgrade-block">
+        <p>+1 Atom per Click</p>
+        <form method="POST" action="{% url 'index' %}">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="upgrade_gain">
+          <input type="hidden" name="upgrade_name" value="plus_one">
+          <button type="submit">Upgrade (Cost {{ plus_one_cost }} Atoms)</button>
+        </form>
+      </div>
+      
+      <!-- 2x Atom per Click -->
+      <div class="upgrade-block">
+        <p>2x Atom per Click</p>
+        <form method="POST" action="{% url 'index' %}">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="upgrade_gain">
+          <input type="hidden" name="upgrade_name" value="times_two">
+          <button type="submit">Upgrade (Cost {{ times_two_cost }} Atoms)</button>
+        </form>
+      </div>
+      <!-- Auto-Clicker -->
+      {% if not auto_clicker_active %}
+        <form method="POST" action="{% url 'index' %}">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="upgrade_gain">
+          <input type="hidden" name="upgrade_name" value="auto_clicker">
+          <button type="submit">Auto-Clicker (Cost 100 Atoms)</button>
+        </form>
+      {% endif %}
+      {% if auto_clicker_active %}
+        <p style="color: limegreen;">Auto-Clicker is running ✅</p>
+      {% endif %}
+    </div>
+  </div>
+
+</div>
+
+<form method="POST" action="{% url 'restart' %}">
+
+  {% csrf_token %}
+  <button type="submit" id="restart-button">Restart Game</button>
+</form>
+
+<!-- FOR AUTOCLICKER -->
+<script>
+  function autoClickerTick() {
+    fetch("{% url 'auto_clicker_tick' %}", {
+      method: "POST",
+      headers: {
+        "X-CSRFToken": "{{ csrf_token }}",
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({})
+    })
+    .then(response => response.json())
+    .then(data => {
+      document.getElementById("points-counter").innerText = data.point + " Atoms";
+    });
+  }
+
+  // ✅ Use Django to set a JS flag
+  var autoClickerEnabled = "{{ auto_clicker_active|yesno:'true,false' }}".trim() === "true";
+
+
+if (autoClickerEnabled) {
+  setInterval(autoClickerTick, 1000); // every 1 second
+}
+</script>
+<!-- FOR ANIMATION AND STUFF -->
+<script>
+  function pulse() {
+  const atom = document.getElementById("atom");
+  atom.classList.add("pulsing");
+  setTimeout(() => atom.classList.remove("pulsing"), 400);
+  }
+</script>
+<script>
+  function handleUpgrade(event, button) {
+  event.preventDefault();
+
+  const cost = parseInt(button.dataset.cost);
+  const userPoints = parseInt(button.dataset.userPoints);
+
+  const canAfford = userPoints >= cost;
+
+  flashGlow(button, canAfford);
+
+  const ripple = document.createElement('span');
+  ripple.classList.add('ripple');
+  ripple.style.background = canAfford
+    ? 'rgba(0, 255, 0, 0.3)' // green
+    : 'rgba(255, 0, 0, 0.3)'; // red
+
+  const rect = button.getBoundingClientRect();
+  ripple.style.left = `${event.clientX - rect.left - 75}px`;
+  ripple.style.top = `${event.clientY - rect.top - 75}px`;
+
+  button.appendChild(ripple);
+
+  if (canAfford) {
+    setTimeout(() => {
+      button.closest('form').submit();
+    }, 1000);
+  } else {
+    setTimeout(() => ripple.remove(), 1000);
+  }
+}
+</script>
+<script>
+function flashGlow(button, canAfford) {
+  button.classList.remove('glow-flash', 'glow-fail');
+  void button.offsetWidth; // force reflow
+
+  button.classList.add(canAfford ? 'glow-flash' : 'glow-fail');
+}
+</script>
+<script>
+  const counter = document.getElementById("points-counter");
+  counter.classList.add("glow");
+  setTimeout(() => counter.classList.remove("glow"), 600);
+</script>
+{% endblock %}
