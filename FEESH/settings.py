@@ -28,7 +28,7 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 SECRET_KEY = 'django-insecure-^8%_4zlcgthv3r$!eqkqv&^7%w-au_$y#jkn!o3a4#n!j&3y1f'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ["atomclicker-production.up.railway.app"]
 

@@ -64,7 +64,7 @@ def register(request):
 def restart(request):
     if request.method=="POST":
         request.user.point = 0 
-        request.session["atom_gain"] = 10000
+        request.session["atom_gain"] = 1
         request.session["plus_one_cost"] = 10
         request.session["times_two_cost"] = 1000
         request.session["auto_clicker_active"] = False
