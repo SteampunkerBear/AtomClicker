@@ -92,7 +92,7 @@ def apply_model_prestige(request, model_name, cost, flag_name):
         request.user.point = 0
 
         # Apply multiplier
-        request.session["model_multiplier"] = request.session.get("model_multiplier", 1) * 2
+        request.session["model_multiplier"] = request.session.get("model_multiplier", 1) * 4
 
         # Update model state
         request.session["model_right_now"] = model_name
@@ -102,8 +102,6 @@ def apply_model_prestige(request, model_name, cost, flag_name):
     return False
 
 def auto_clicker_tick(request):
-
-
 
     if request.method == "POST" and request.session.get("auto_clicker_active"):
         atom_gain = request.session.get("atom_gain", 1)
@@ -194,7 +192,7 @@ def index(request):
                 if request.user.point >= cost: 
                     request.user.point -= cost
                     request.session["atom_gain"] += 1
-                    request.session["plus_one_cost"] = int(cost**1.15) #Increase cost
+                    request.session["plus_one_cost"] = int(cost**1.05) #Increase cost
                     request.user.save()
                 else:
                     pass
@@ -210,7 +208,7 @@ def index(request):
                     
                     #recalculate cost using exponential scales!!!!
                     new_level = level + 1
-                    request.session["times_two_cost"] = int(1000 * (1.15 ** new_level)) #Increase cost
+                    request.session["times_two_cost"] = int(1000 * (1.5 ** new_level)) #Increase cost
                     request.user.save()
                 else:
                     pass
