@@ -1,0 +1,9 @@
+{% extends "layout.html" %}
+{% block body %}
+
+<div class="broken-container">
+    <h1>💥 You broke the game!</h1>
+    <p>Your atoms went nuclear. Our calculator couldn't keep up.</p>
+    <p><a href="{% url 'restart' %}">Restart the reactor</a></p>
+</div>
+{% endblock %}

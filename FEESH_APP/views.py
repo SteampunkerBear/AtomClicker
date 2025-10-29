@@ -80,7 +80,6 @@ def restart(request):
         request.session["model_current_purchased"] = False
         request.session["model_multiplier"] = 1
         request.user.save()
-        
     return redirect('index')
 
 def apply_model_prestige(request, model_name, cost, flag_name):
@@ -135,6 +134,9 @@ def click_atom(request):
 
         return JsonResponse({"point": request.user.point})
     return JsonResponse({"error": "Invalid request"})
+
+def game_broken(request):
+    return render(request, "game_broken.html")
 
 @login_required(login_url='login')
 
@@ -198,6 +200,11 @@ def index(request):
 
     atom_gain = request.session["base_gain"] * request.session["gain_multiplier"] * request.session["model_multiplier"]
     
+    try:
+        if atom_gain > 2**31 - 1:
+            return redirect("game_broken")
+    except (KeyError, OverflowError, ValueError):
+        return redirect("game_broken")
     if request.method=="POST":
         user_action = request.POST.get("action")
         if user_action == "click":
@@ -205,7 +212,7 @@ def index(request):
             request.user.point += atom_gain
             request.user.save()
             point = request.user.point
-                
+            return redirect("index")
         elif user_action == "upgrade_gain":
             upgrade_name = request.POST.get("upgrade_name")
             if upgrade_name == "plus_one":
@@ -226,10 +233,7 @@ def index(request):
 
                 if request.user.point >= mult_cost:
                     request.user.point -= mult_cost
-                    if request.session["times_two_level"] == 0:
-                        request.session["gain_multiplier"] += 1
-                    else:
-                        request.session["gain_multiplier"] += 2
+                    request.session["gain_multiplier"] *= 2
                     request.session["times_two_level"] = level + 1
                     
                     #recalculate cost using exponential scales!!!!
