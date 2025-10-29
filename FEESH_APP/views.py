@@ -248,9 +248,9 @@ def index(request):
     point = request.user.point
     if model == "dalton":
         image_path = "images/black_sphere.png"
-        button_text = "Dolton model"
-        fun_fact = "FUN FACT ABOUT DOLTON: Dalton helped further research on color blindness by donating his eyes after his death. Dalton believed that the liquid behind your eye was a filter for colors and that he was missing something since he couldn’t see all colors. After the autopsy it was discovered that the liquid was colorless meaning his theory was wrong. However DNA analysis shows that Dalton was missing a receptor for green."
-        info_on_model = "THE DOLTON MODEL: John Dalton was the first scientist to create a modern atomic theory, which stated that atoms are the smallest forms of elements, atoms of the same element have the same atomic mass, and thus atoms of different elements have different masses. The Dalton model only has a nucleus."
+        button_text = "Dalton model"
+        fun_fact = "FUN FACT ABOUT DALTON: Dalton helped further research on color blindness by donating his eyes after his death. Dalton believed that the liquid behind your eye was a filter for colors and that he was missing something since he couldn’t see all colors. After the autopsy it was discovered that the liquid was colorless meaning his theory was wrong. However DNA analysis shows that Dalton was missing a receptor for green."
+        info_on_model = "THE DALTON MODEL: John Dalton was the first scientist to create a modern atomic theory, which stated that atoms are the smallest forms of elements, atoms of the same element have the same atomic mass, and thus atoms of different elements have different masses. The Dalton model only has a nucleus."
     elif model == "thomson":
         image_path = "images/thomson.png"
         button_text = "Thomson model"
@@ -272,8 +272,8 @@ def index(request):
     elif model == "current":
         image_path = "images/modern.png"
         button_text = "Modern model"
-        fun_fact = "FUN FACT ABOUT SCHRODINGER, EINSTEN, AND HEISENBERG:"
-        info_on_model = "THE CURRENT MODEL:"
+        fun_fact = "FUN FACT ABOUT SCHRODINGER, EINSTEN, AND HEISENBERG: Schrodinger would tell people that asked him if the cat was alive or dead that they should ask the cat. Einsten really enjoyed sailing however he was not too skilled and capsized multiple times. Schrodinger also made a book What is Life? that inspired the discovery of DNA, Watson and Crick credited him with his ideas. Heseinberg has a crater on the moon named after him because he had great contributions toward quantum mechanics that they gave him the honor of naming the crater after him."
+        info_on_model = "THE CURRENT MODEL: When Erwin Schrödinger began his work (around 1925–1926), Niels Bohr’s atomic model (1913) was still the best available theory to describe the structure of the atom. Bohr’s model explained the hydrogen atom’s spectral lines using quantized orbits — electrons moving in fixed circular paths around the nucleus. He was able to verify the energy levels using the new method and found that they catch up with Bohr. Schrödinger transformed Bohr’s discrete orbits into wave-like probability clouds."
     return render(request, 'index.html', {
         'point': point,
         'image_path': image_path,
