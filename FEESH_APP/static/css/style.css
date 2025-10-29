@@ -213,6 +213,11 @@ img {
   font-weight: bold;
   border-radius: 8px;
   box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+  transform: scale(1);
+  opacity: 1;
+}
+
+.upgrade-badge.animate {
   animation: badgeFloat 1s ease-out;
 }
 

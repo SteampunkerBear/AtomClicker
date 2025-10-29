@@ -67,6 +67,9 @@ def restart(request):
         request.session["atom_gain"] = 1
         request.session["plus_one_cost"] = 10
         request.session["times_two_cost"] = 1000
+        request.session["base_gain"] = 1
+        request.session["gain_multiplier"] = 1
+        request.session["times_two_level"] = 0
         request.session["auto_clicker_active"] = False
         request.session["auto_clicker_gain"] = 1
         request.session["model_right_now"] = "dalton"
@@ -89,6 +92,8 @@ def apply_model_prestige(request, model_name, cost, flag_name):
         request.session["times_two_level"] = 0
         request.session["auto_clicker_active"] = False
         request.session["auto_clicker_gain"] = 1
+        request.session["base_gain"] = 1
+        request.session["gain_multiplier"] = 1
         request.user.point = 0
 
         # Apply multiplier
@@ -104,9 +109,13 @@ def apply_model_prestige(request, model_name, cost, flag_name):
 def auto_clicker_tick(request):
 
     if request.method == "POST" and request.session.get("auto_clicker_active"):
-        atom_gain = request.session.get("atom_gain", 1)
-        multiplier = request.session.get("model_multiplier", 1)
+        base_gain = request.session.get("base_gain", 1)
+        gain_multiplier = request.session.get("gain_multiplier", 1)
+        model_multiplier = request.session.get("model_multiplier", 1)
 
+        atom_gain = base_gain * gain_multiplier * model_multiplier
+
+        multiplier = request.session.get("model_multiplier", 1)
         gain = atom_gain * multiplier
         request.user.point += gain
         request.user.save()
@@ -130,13 +139,16 @@ def click_atom(request):
 @login_required(login_url='login')
 
 def index(request):
+    atom_gain = request.session["base_gain"] * request.session["gain_multiplier"] * request.session["model_multiplier"]
     #FOR ATOM PLUS ONE
-    if "atom_gain" not in request.session:
-        request.session["atom_gain"] = 1
+    if "base_gain" not in request.session:
+        request.session["base_gain"] = 1
     if "plus_one_cost" not in request.session:
         request.session["plus_one_cost"] = 10  # Starting cost
     
     #FOR ATOM TIMES TWO
+    if "gain_multiplier" not in request.session:
+        request.session["gain_multiplier"] = 1
     if "times_two_cost" not in request.session:
         request.session["times_two_cost"] = 1000
     if "times_two_level" not in request.session:
@@ -167,20 +179,28 @@ def index(request):
     if "model_current_purchased" not in request.session:
         request.session["model_current_purchased"] = False
 
+    # FOR MODEL UPGRADES SO THEY ONLY PLAY ANIMATION ONCE!
+    if "just_upgraded_thomson" not in request.session:
+        request.session["just_upgraded_thomson"] = False
+
+    if "just_upgraded_rutherford" not in request.session:
+        request.session["just_upgraded_rutherford"] = False
+
+    if "just_upgraded_bohr" not in request.session:
+        request.session["just_upgraded_bohr"] = False
+
+    if "just_upgraded_current" not in request.session:
+        request.session["just_upgraded_current"] = False
+
+    just_upgraded_thomson = request.session.pop("just_upgraded_thomson", False)
+    just_upgraded_rutherford = request.session.pop("just_upgraded_rutherford", False)
+    just_upgraded_bohr = request.session.pop("just_upgraded_bohr", False)
+    just_upgraded_current = request.session.pop("just_upgraded_current", False)
     if request.method=="POST":
         user_action = request.POST.get("action")
         if user_action == "click":
-            base_gain = request.session["atom_gain"]
-            model = request.session["model_right_now"]
-            multiplier = request.session.get("model_multiplier", 1)
 
-            # Only apply multiplier if model is beyond Dalton
-            if model != "dalton":
-                gain = base_gain * multiplier
-            else:
-                gain = base_gain
-
-            request.user.point += gain
+            request.user.point += atom_gain
             request.user.save()
             point = request.user.point
                 
@@ -191,9 +211,10 @@ def index(request):
                 cost = request.session["plus_one_cost"]
                 if request.user.point >= cost: 
                     request.user.point -= cost
-                    request.session["atom_gain"] += 1
+                    request.session["base_gain"] += 1
                     request.session["plus_one_cost"] = int(cost**1.05) #Increase cost
                     request.user.save()
+                    return redirect('index')
                 else:
                     pass
             elif upgrade_name == "times_two":
@@ -203,13 +224,17 @@ def index(request):
 
                 if request.user.point >= mult_cost:
                     request.user.point -= mult_cost
-                    request.session["atom_gain"] *= 2
+                    if request.session["times_two_level"] == 0:
+                        request.session["gain_multiplier"] += 1
+                    else:
+                        request.session["gain_multiplier"] += 2
                     request.session["times_two_level"] = level + 1
                     
                     #recalculate cost using exponential scales!!!!
                     new_level = level + 1
                     request.session["times_two_cost"] = int(1000 * (1.5 ** new_level)) #Increase cost
                     request.user.save()
+                    return redirect('index')
                 else:
                     pass
             elif upgrade_name == "auto_clicker":
@@ -218,7 +243,7 @@ def index(request):
                 if request.user.point >= clicker_cost and not request.session.get("auto_clicker_active", False):
                     request.user.point -= clicker_cost
                     request.session["auto_clicker_active"] = True
-                    request.session["auto_clicker_gain"] = request.session["atom_gain"] #number of atoms per tick
+                    request.session["auto_clicker_gain"] = atom_gain#number of atoms per tick
                     request.user.save()
                 else:
                     pass
@@ -229,20 +254,23 @@ def index(request):
 
             if upgrade_name == "thomson" and request.session["model_right_now"] == "dalton":
                 if apply_model_prestige(request, "thomson", 5000, "model_thomson_purchased"):
+                    request.session["just_upgraded_thomson"] = False
                     return redirect('index')
 
             elif upgrade_name == "rutherford" and request.session["model_right_now"] == "thomson":
                 if apply_model_prestige(request, "rutherford", 50000, "model_rutherford_purchased"):
+                    request.session["just_upgraded_rutherford"] = False
                     return redirect('index')
 
             elif upgrade_name == "bohr" and request.session["model_right_now"] == "rutherford":
                 if apply_model_prestige(request, "bohr", 500000, "model_bohr_purchased"):
+                    request.session["just_upgraded_bohr"] = False
                     return redirect('index')
 
             elif upgrade_name == "current" and request.session["model_right_now"] == "bohr":
                 if apply_model_prestige(request, "current", 10000000, "model_current_purchased"):
+                    request.session["just_upgraded_current"] = False
                     return redirect('index')
-
      # Choose image based on point count
     model = request.session["model_right_now"]
     point = request.user.point
@@ -280,7 +308,7 @@ def index(request):
         'button_text' : button_text,
         'fun_fact' : fun_fact,
         'info_on_model' : info_on_model,
-        'atom_gain': request.session.get("atom_gain", 1),
+        'atom_gain': atom_gain,
         'plus_one_cost': request.session["plus_one_cost"],
         'times_two_cost': request.session["times_two_cost"],
         'auto_clicker_active': request.session.get("auto_clicker_active", False),
@@ -289,6 +317,10 @@ def index(request):
         'model_rutherford_purchased': request.session.get("model_rutherford_purchased", False),
         'model_bohr_purchased': request.session.get("model_bohr_purchased", False),
         'model_current_purchased': request.session.get("model_current_purchased", False),
-        'model_multiplier': request.session.get("model_multiplier", 1)
+        'model_multiplier': request.session.get("model_multiplier", 1),
+        'just_upgraded_thomson': just_upgraded_thomson,
+        'just_upgraded_rutherford': just_upgraded_rutherford,
+        'just_upgraded_bohr': just_upgraded_bohr,
+        'just_upgraded_current': just_upgraded_current,
         })
 

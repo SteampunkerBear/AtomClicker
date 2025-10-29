@@ -18,11 +18,15 @@
       <!-- Atom model evolution buttons -->
       <h2>Model Upgrades</h2>
       {% if model_right_now != "dalton" %}
-        <p class="model-multiplier">Model Multiplier: {{ model_multiplier }}x</p>
+        <p class="{% if just_upgraded_thomson %}model-multiplier{%endif %}">
+          Model Multiplier: {{ model_multiplier }}x
+        </p>
       {% endif %}
               <!-- Upgrade to Thomson Model -->
       {% if model_thomson_purchased %}
-        <div class="upgrade-badge">Upgraded!</div>
+        <div class="upgrade-badge {% if just_upgraded_thomson %}animate{% endif %}">
+          Upgraded!
+        </div>
       {% else %}
         <form method="POST" action="{% url 'index' %}">
           {% csrf_token %}
@@ -42,7 +46,9 @@
 
       <!-- Upgrade to Rutherford Model -->
       {% if model_rutherford_purchased %}
-        <div class="upgrade-badge">Upgraded!</div>
+        <div class="upgrade-badge {% if just_upgraded_rutherford %}animate{% endif %}">
+          Upgraded!
+        </div>
       {% else %}
         <form method="POST" action="{% url 'index' %}">
           {% csrf_token %}
@@ -62,7 +68,9 @@
 
       <!-- Upgrade to Bohr Model -->
       {% if model_bohr_purchased %}
-        <div class="upgrade-badge">Upgraded!</div>
+        <div class="upgrade-badge {% if just_upgraded_bohr %}animate{% endif %}">
+          Upgraded!
+        </div>
       {% else %}
         <form method="POST" action="{% url 'index' %}">
           {% csrf_token %}
@@ -82,7 +90,9 @@
 
       <!-- Upgrade to Current Model -->
       {% if model_current_purchased %}
-      <div class="upgrade-badge">Upgraded!</div>
+      <div class="upgrade-badge {% if just_upgraded_current %}animate{% endif %}">
+        Upgraded!
+      </div>
     {% else %}
       <form method="POST" action="{% url 'index' %}">
         {% csrf_token %}
@@ -190,7 +200,7 @@
 
 
 if (autoClickerEnabled) {
-  setInterval(autoClickerTick, 1000); // every 1 second
+  setInterval(autoClickerTick, 250); // every 1 second
 }
 </script>
 <!-- FOR ANIMATION AND STUFF -->
