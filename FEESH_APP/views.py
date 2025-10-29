@@ -139,7 +139,6 @@ def click_atom(request):
 @login_required(login_url='login')
 
 def index(request):
-    atom_gain = request.session["base_gain"] * request.session["gain_multiplier"] * request.session["model_multiplier"]
     #FOR ATOM PLUS ONE
     if "base_gain" not in request.session:
         request.session["base_gain"] = 1
@@ -196,6 +195,9 @@ def index(request):
     just_upgraded_rutherford = request.session.pop("just_upgraded_rutherford", False)
     just_upgraded_bohr = request.session.pop("just_upgraded_bohr", False)
     just_upgraded_current = request.session.pop("just_upgraded_current", False)
+
+    atom_gain = request.session["base_gain"] * request.session["gain_multiplier"] * request.session["model_multiplier"]
+    
     if request.method=="POST":
         user_action = request.POST.get("action")
         if user_action == "click":
