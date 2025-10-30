@@ -203,15 +203,8 @@ if (autoClickerEnabled) {
   setInterval(autoClickerTick, 250); // every 1 second
 }
 </script>
-<!-- FOR ANIMATION AND STUFF -->
-<script>
-  function pulse() {
-  const atom = document.getElementById("atom");
-  atom.classList.add("pulsing");
-  setTimeout(() => atom.classList.remove("pulsing"), 400);
-  }
-</script>
-<script>
+<!-- FOR HANDLING MODEL UPGRADES-->
+ <script>
   function handleUpgrade(event, button) {
   event.preventDefault();
 
@@ -236,12 +229,21 @@ if (autoClickerEnabled) {
 
   if (canAfford) {
     setTimeout(() => {
+      button.disabled = true;
       button.closest('form').submit();
     }, 1000);
   } else {
     setTimeout(() => ripple.remove(), 1000);
   }
 }
+</script>
+<!-- FOR ANIMATION AND STUFF -->
+<script>
+  function pulse() {
+  const atom = document.getElementById("atom");
+  atom.classList.add("pulsing");
+  setTimeout(() => atom.classList.remove("pulsing"), 400);
+  }
 </script>
 <script>
 function flashGlow(button, canAfford) {
@@ -255,5 +257,17 @@ function flashGlow(button, canAfford) {
   const counter = document.getElementById("points-counter");
   counter.classList.add("glow");
   setTimeout(() => counter.classList.remove("glow"), 600);
+</script>
+<!-- to make sure model upgrade animation happens -->
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const badges = document.querySelectorAll(".upgrade-badge.animate");
+
+    badges.forEach(badge => {
+      badge.classList.remove("animate");
+      void badge.offsetWidth; // force reflow
+      badge.classList.add("animate");
+    });
+  });
 </script>
 {% endblock %}

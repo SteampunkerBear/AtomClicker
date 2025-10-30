@@ -60,6 +60,33 @@ def register(request):
     else:
         return render(request, "register.html")
 
+# intializes all the goodies
+def initialize_session_defaults(session):
+    defaults = {
+        "base_gain": 1,
+        "plus_one_cost": 10,
+        "gain_multiplier": 1,
+        "times_two_cost": 1000,
+        "times_two_level": 0,
+        "auto_clicker_active": False,
+        "auto_clicker_gain": 1,
+        "model_multiplier": 1,
+        "model_right_now": "dalton",
+        "model_thomson_purchased": False,
+        "model_rutherford_purchased": False,
+        "model_bohr_purchased": False,
+        "model_current_purchased": False,
+        "just_upgraded_thomson": False,
+        "just_upgraded_rutherford": False,
+        "just_upgraded_bohr": False,
+        "just_upgraded_current": False
+    }  # ✅ dictionary ends here
+
+    # ✅ now the loop runs after the dictionary is defined
+    for key, value in defaults.items():
+        if key not in session:
+            session[key] = value
+
 #RESTART BUTTON
 def restart(request):
     if request.method=="POST":
@@ -80,6 +107,7 @@ def restart(request):
         request.session["model_current_purchased"] = False
         request.session["model_multiplier"] = 1
         request.user.save()
+        print("restart succesful")
     return redirect('index')
 
 def apply_model_prestige(request, model_name, cost, flag_name):
@@ -141,64 +169,15 @@ def game_broken(request):
 @login_required(login_url='login')
 
 def index(request):
-    #FOR ATOM PLUS ONE
-    if "base_gain" not in request.session:
-        request.session["base_gain"] = 1
-    if "plus_one_cost" not in request.session:
-        request.session["plus_one_cost"] = 10  # Starting cost
-    
-    #FOR ATOM TIMES TWO
-    if "gain_multiplier" not in request.session:
-        request.session["gain_multiplier"] = 1
-    if "times_two_cost" not in request.session:
-        request.session["times_two_cost"] = 1000
-    if "times_two_level" not in request.session:
-        request.session["times_two_level"] = 0
-    #FOR AUTOCLICKER
-    if "auto_clicker_active" not in request.session:
-        request.session["auto_clicker_active"] = False
-
-    if "auto_clicker_gain" not in request.session:
-        request.session["auto_clicker_gain"] = 1  # atoms per tick
-
-    #FOR MODEL UPGRADES
-    if "model_multiplier" not in request.session:
-        request.session["model_multiplier"] = 1
-
-    if "model_right_now" not in request.session:
-        request.session["model_right_now"] = "dalton"
-
-    if "model_thomson_purchased" not in request.session:
-        request.session["model_thomson_purchased"] = False
-
-    if "model_rutherford_purchased" not in request.session:
-        request.session["model_rutherford_purchased"] = False
-
-    if "model_bohr_purchased" not in request.session:
-        request.session["model_bohr_purchased"] = False
-
-    if "model_current_purchased" not in request.session:
-        request.session["model_current_purchased"] = False
-
-    # FOR MODEL UPGRADES SO THEY ONLY PLAY ANIMATION ONCE!
-    if "just_upgraded_thomson" not in request.session:
-        request.session["just_upgraded_thomson"] = False
-
-    if "just_upgraded_rutherford" not in request.session:
-        request.session["just_upgraded_rutherford"] = False
-
-    if "just_upgraded_bohr" not in request.session:
-        request.session["just_upgraded_bohr"] = False
-
-    if "just_upgraded_current" not in request.session:
-        request.session["just_upgraded_current"] = False
+ 
+    initialize_session_defaults(request.session)
 
     just_upgraded_thomson = request.session.pop("just_upgraded_thomson", False)
     just_upgraded_rutherford = request.session.pop("just_upgraded_rutherford", False)
     just_upgraded_bohr = request.session.pop("just_upgraded_bohr", False)
     just_upgraded_current = request.session.pop("just_upgraded_current", False)
 
-    atom_gain = request.session["base_gain"] * request.session["gain_multiplier"] * request.session["model_multiplier"]
+    atom_gain = request.session["base_gain"] * request.session["gain_multiplier"] * request.session["model_multiplier"] 
     
     try:
         if atom_gain > 2**31 - 1:
@@ -212,7 +191,6 @@ def index(request):
             request.user.point += atom_gain
             request.user.save()
             point = request.user.point
-            return redirect("index")
         elif user_action == "upgrade_gain":
             upgrade_name = request.POST.get("upgrade_name")
             if upgrade_name == "plus_one":
@@ -260,22 +238,22 @@ def index(request):
 
             if upgrade_name == "thomson" and request.session["model_right_now"] == "dalton":
                 if apply_model_prestige(request, "thomson", 5000, "model_thomson_purchased"):
-                    request.session["just_upgraded_thomson"] = False
+                    request.session["just_upgraded_thomson"] = True
                     return redirect('index')
 
             elif upgrade_name == "rutherford" and request.session["model_right_now"] == "thomson":
                 if apply_model_prestige(request, "rutherford", 50000, "model_rutherford_purchased"):
-                    request.session["just_upgraded_rutherford"] = False
+                    request.session["just_upgraded_rutherford"] = True
                     return redirect('index')
 
             elif upgrade_name == "bohr" and request.session["model_right_now"] == "rutherford":
                 if apply_model_prestige(request, "bohr", 500000, "model_bohr_purchased"):
-                    request.session["just_upgraded_bohr"] = False
+                    request.session["just_upgraded_bohr"] = True
                     return redirect('index')
 
             elif upgrade_name == "current" and request.session["model_right_now"] == "bohr":
                 if apply_model_prestige(request, "current", 10000000, "model_current_purchased"):
-                    request.session["just_upgraded_current"] = False
+                    request.session["just_upgraded_current"] = True
                     return redirect('index')
      # Choose image based on point count
     model = request.session["model_right_now"]
@@ -290,13 +268,11 @@ def index(request):
         button_text = "Thomson model"
         fun_fact = "FUN FACT ABOUT THOMSON: J. J. Thomson received the Nobel Prize in Physics in 1906, and so did his son, George Paget Thomson, in 1937.  He worked as a master for Trinity College, and a total of seven Nobel Prizes were awarded those who worked under him."
         info_on_model = "THE THOMSON MODEL: J. J. Thomson’s atomic theory is known as the Plum Pudding model, proposing that atoms are spheres of positive charge with electrons contained inside.  He came up with this model because he observed that cathode rays (electrons) were negatively charged, so the rest of the atom must be positive to make the atom neutral."
-
     elif model == "rutherford":
         image_path = "images/rutherford.png" 
         button_text = "Rutherford model"
         fun_fact = "FUN FACT ABOUT RUTHERFORD: Rutherford is known as the father of nuclear physics, discovering concepts such as radioactive half-life, alpha and beta radiation, and radon.  Rutherford’s face is featured on the front of the New Zealand $100 bill, and element 104, rutherfordium, is named after him."
         info_on_model = "THE RUTHERFORD MODEL: Ernest Rutherford was the creator of the nuclear model, showing that an atom consists of a small, dense, positively charged nucleus that is surrounded by orbiting electrons and mostly empty space.  Rutherford came to this conclusion after observing how positively charged alpha particles passed through gold foil, but a few were deflected by presumably small particles with a positive charge."
-
     elif model == "bohr":
         image_path = "images/bohr.png"
         button_text = "Bohr model"

@@ -4,6 +4,9 @@
 <div class="broken-container">
     <h1>💥 You broke the game!</h1>
     <p>Your atoms went nuclear. Our calculator couldn't keep up.</p>
-    <p><a href="{% url 'restart' %}">Restart the reactor</a></p>
+    <form method="POST" action="{% url 'restart' %}">
+        {% csrf_token %}
+        <button type="submit">Restart</button>
+    </form>
 </div>
 {% endblock %}
